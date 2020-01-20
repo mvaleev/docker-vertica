@@ -40,8 +40,10 @@ echo 'Starting up'
 if [ ! -f ${VERTICADATA}/config/admintools.conf ]; then
   echo 'Fixing filesystem permissions'
   fix_filesystem_permissions
-  echo 'Creating database'
-  su - dbadmin -c "/opt/vertica/bin/admintools -t create_db --skip-fs-checks -s localhost -d ${DATABASE_NAME} ${DBPW} -c ${VERTICADATA}/catalog -D ${VERTICADATA}/data"
+  if [[ ! $(su - dbadmin -c "/opt/vertica/bin/admintools -t list_allnodes" | grep ${DATABASE_NAME}) ]]; then
+    echo 'Creating database'
+    su - dbadmin -c "/opt/vertica/bin/admintools -t create_db --skip-fs-checks -s localhost -d ${DATABASE_NAME} ${DBPW} -c ${VERTICADATA}/catalog -D ${VERTICADATA}/data"
+  fi
 else
   echo 'Restoring configuration'
   cp ${VERTICADATA}/config/admintools.conf /opt/vertica/config/admintools.conf
